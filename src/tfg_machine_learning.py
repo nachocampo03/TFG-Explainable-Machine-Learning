@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import shap
 from matplotlib.patches import Patch
+from pathlib import Path
 
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -14,15 +15,19 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, recall_score, confusion_matrix
 from sklearn.metrics import roc_auc_score, precision_score, f1_score
 
-import os
-os.chdir(r"C:\Users\nacho\Documents\CUNEF\Trabajos de Fin de Grado\TFG - Informática\Code")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_FILE = PROJECT_ROOT / "data" / "Heart_disease_cleveland_new.csv"
+OUTPUT_DIR = PROJECT_ROOT / "images"
+OUTPUT_DIR.mkdir(exist_ok=True)
+RESULTS_DIR = PROJECT_ROOT / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
 
 
 # ============================================================
 # 1. CARGA Y EXPLORACIÓN DEL DATASET
 # ============================================================
 
-dataset = pd.read_csv(r"C:\Users\nacho\Documents\CUNEF\Trabajos de Fin de Grado\TFG - Informática\archive\Heart_disease_cleveland_new.csv")
+dataset = pd.read_csv(DATA_FILE)
 
 print(dataset.describe())
 print(dataset.groupby('target').mean())
@@ -32,7 +37,7 @@ dataset = dataset.sample(frac=1, random_state=42).reset_index(drop=True)
 plt.figure(figsize=(12, 10))
 sns.heatmap(dataset.corr(), annot=True, cmap="coolwarm", fmt=".2f")
 plt.title("Correlation Graph")
-plt.savefig("correlation_matrix.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "correlation_matrix.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
@@ -161,7 +166,7 @@ sns.heatmap(confusion_matrix(y_test, y_pred_nb), annot=True, fmt="d", cmap="Blue
 plt.xlabel("Predicción")
 plt.ylabel("Real")
 plt.title("Matriz de confusión - Naive Bayes")
-plt.savefig("confusion_nb.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "confusion_nb.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -186,7 +191,7 @@ sns.heatmap(confusion_matrix(y_test, rf_pred), annot=True, fmt="d", cmap="Greens
 plt.xlabel("Predicción")
 plt.ylabel("Real")
 plt.title("Matriz de confusión - Random Forest")
-plt.savefig("confusion_rf.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "confusion_rf.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -211,7 +216,7 @@ sns.heatmap(confusion_matrix(y_test, gb_pred), annot=True, fmt="d", cmap="Orange
 plt.xlabel("Predicción")
 plt.ylabel("Real")
 plt.title("Matriz de confusión - Gradient Boosting")
-plt.savefig("confusion_gb.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "confusion_gb.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -236,7 +241,7 @@ sns.heatmap(confusion_matrix(y_test, log_pred), annot=True, fmt="d", cmap="Purpl
 plt.xlabel("Predicción")
 plt.ylabel("Real")
 plt.title("Matriz de confusión - Regresión Logística")
-plt.savefig("confusion_lr.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "confusion_lr.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -256,7 +261,7 @@ coef_df = pd.DataFrame({
 
 print("\n--- Coeficientes Regresión Logística ---")
 print(coef_df.round(4).to_string(index=False))
-coef_df.to_csv("coeficientes_logreg.csv", index=False)
+coef_df.to_csv(RESULTS_DIR / "coeficientes_logreg.csv", index=False)
 
 colores_coef = []
 for v in coef_df["Coeficiente"]:
@@ -271,7 +276,7 @@ plt.axvline(0, color="black")
 plt.xlabel("Coeficiente")
 plt.title("Coeficientes de la Regresión Logística")
 plt.tight_layout()
-plt.savefig("coeficientes_logreg.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "coeficientes_logreg.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -381,7 +386,7 @@ leyenda = [Patch(facecolor="#d73027", label="Predicho: enfermedad"),
            Patch(facecolor="#4575b4", label="Predicho: sano")]
 plt.legend(handles=leyenda, loc="lower right")
 plt.tight_layout()
-plt.savefig("shap_rf_beeswarm.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "shap_rf_beeswarm.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -417,7 +422,7 @@ leyenda = [Patch(facecolor="#d73027", label="Predicho: enfermedad"),
            Patch(facecolor="#4575b4", label="Predicho: sano")]
 plt.legend(handles=leyenda, loc="lower right")
 plt.tight_layout()
-plt.savefig("shap_gb_beeswarm.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "shap_gb_beeswarm.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -453,7 +458,7 @@ leyenda = [Patch(facecolor="#d73027", label="Predicho: enfermedad"),
            Patch(facecolor="#4575b4", label="Predicho: sano")]
 plt.legend(handles=leyenda, loc="lower right")
 plt.tight_layout()
-plt.savefig("shap_lr_beeswarm.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "shap_lr_beeswarm.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -501,7 +506,7 @@ leyenda = [Patch(facecolor="#d73027", label="Predicho: enfermedad"),
 fig.legend(handles=leyenda, loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.02))
 fig.suptitle("SHAP — Los 3 modelos (coloreado por clase predicha)")
 plt.tight_layout()
-plt.savefig("shap_beeswarms_compacto.png", dpi=300, bbox_inches="tight")
+plt.savefig(OUTPUT_DIR / "shap_beeswarms_compacto.png", dpi=300, bbox_inches="tight")
 plt.close()
 
 
@@ -522,7 +527,7 @@ tabla_shap = pd.DataFrame({
 
 print("\n--- Importancia media SHAP ---")
 print(tabla_shap.round(4).to_string(index=False))
-tabla_shap.to_csv("shap_importancia_tabla.csv", index=False)
+tabla_shap.to_csv(RESULTS_DIR / "shap_importancia_tabla.csv", index=False)
 
 
 # ============================================================
@@ -543,7 +548,7 @@ tabla_rf = pd.DataFrame({
 tabla_rf["Diferencia"] = tabla_rf["SHAP medio (disease)"] - tabla_rf["SHAP medio (no disease)"]
 print("\n--- SHAP disease vs no disease: Random Forest ---")
 print(tabla_rf.round(4).to_string(index=False))
-tabla_rf.to_csv("shap_grupos_rf.csv", index=False)
+tabla_rf.to_csv(RESULTS_DIR / "shap_grupos_rf.csv", index=False)
 
 # Gradient Boosting
 idx_disease_gb    = [i for i in range(len(gb_pred)) if gb_pred[i] == 1]
@@ -557,7 +562,7 @@ tabla_gb = pd.DataFrame({
 tabla_gb["Diferencia"] = tabla_gb["SHAP medio (disease)"] - tabla_gb["SHAP medio (no disease)"]
 print("\n--- SHAP disease vs no disease: Gradient Boosting ---")
 print(tabla_gb.round(4).to_string(index=False))
-tabla_gb.to_csv("shap_grupos_gb.csv", index=False)
+tabla_gb.to_csv(RESULTS_DIR / "shap_grupos_gb.csv", index=False)
 
 # Regresión Logística
 idx_disease_lr    = [i for i in range(len(log_pred)) if log_pred[i] == 1]
@@ -571,7 +576,7 @@ tabla_lr = pd.DataFrame({
 tabla_lr["Diferencia"] = tabla_lr["SHAP medio (disease)"] - tabla_lr["SHAP medio (no disease)"]
 print("\n--- SHAP disease vs no disease: Regresión Logística ---")
 print(tabla_lr.round(4).to_string(index=False))
-tabla_lr.to_csv("shap_grupos_lr.csv", index=False)
+tabla_lr.to_csv(RESULTS_DIR / "shap_grupos_lr.csv", index=False)
 
 
 # ============================================================
